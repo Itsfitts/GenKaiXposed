@@ -8,8 +8,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.Clock
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Instant
 
 @Singleton
 class ErrorHandler @Inject constructor(
@@ -118,13 +120,13 @@ class ErrorHandler @Inject constructor(
  * Represents an AI error
  */
 data class AIError(
-    val id: String = java.util.UUID.randomUUID().toString(),
+    val id: String = UUID.randomUUID().toString(),
     val agent: AgentType,
     val type: ErrorType,
     val message: String,
     val context: String,
     val metadata: Map<String, String> = emptyMap(),
-    val timestamp: Long = System.currentTimeMillis()
+    val timestamp: Instant = System.currentTimeMillis()
 )
 
 /**
