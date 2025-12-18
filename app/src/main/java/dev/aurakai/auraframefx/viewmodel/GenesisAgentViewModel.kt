@@ -2,11 +2,11 @@
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.aurakai.auraframefx.ai.task.HistoricalTask
 import dev.aurakai.auraframefx.models.AgentPriority
 import dev.aurakai.auraframefx.models.AgentRole
 import dev.aurakai.auraframefx.models.AgentType
 import dev.aurakai.auraframefx.models.HierarchyAgentConfig
+import dev.aurakai.auraframefx.models.HistoricalTask
 import dev.aurakai.auraframefx.utils.AppConstants.STATUS_ERROR
 import dev.aurakai.auraframefx.utils.AppConstants.STATUS_IDLE
 import dev.aurakai.auraframefx.utils.AppConstants.STATUS_PROCESSING
@@ -74,7 +74,7 @@ class GenesisAgentViewModel @Inject constructor(
         )
         _agents.value = defaultAgents
 
-        // Initialize agent statuses  
+        // Initialize agent statuses
         val initialStatuses = mutableMapOf<AgentType, String>()
         val agentTypeMap = mapOf(
             "Genesis" to AgentType.GENESIS,

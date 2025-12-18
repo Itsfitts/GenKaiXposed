@@ -7,7 +7,9 @@ import dev.aurakai.auraframefx.models.InteractionResponse
 import dev.aurakai.auraframefx.utils.toKotlinJsonObject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.json.JsonObject
 import timber.log.Timber
+
 
 interface Agent {
     fun getName(): String?
@@ -48,7 +50,7 @@ abstract class BaseAgent(
         AgentType.valueOf(agentTypeStr.uppercase())
     } catch (e: IllegalArgumentException) {
         Timber.w(e, "Invalid agent type string: %s, defaulting to SYSTEM", agentTypeStr)
-        AgentType.SYSTEM
+        AgentType.USER
     }
 
     /**
@@ -127,17 +129,30 @@ abstract class BaseAgent(
     open fun initializeAdaptiveProtection() {
         Timber.d("initializeAdaptiveProtection called for %s", agentName)
     }
+
+    abstract fun AiRequest(
+        query: String,
+        prompt: String,
+        type: String,
+        context: JsonObject,
+        metadata: JsonObject,
+        agentId: String?,
+        sessionId: String
+    ): AiRequest
+
+    abstract fun AgentResponse(content: String, confidence: Float, p2: Any)
 }
 
 /**
  * Default ethical guidelines for the base agent.
  *
- * @return A list containing three guideline strings: "Be helpful.", "Be harmless.", and "Adhere to base agent principles."
+ * @return A list containing three guideline strings: "Be helpful.", "Be harmless.", "be yourself, and "Adhere to base agent principles."
  */
 fun getEthicalGuidelines(): List<String> = listOf(
     "Be helpful.",
     "Be harmless.",
-    "Adhere to base agent principles."
+    "Adhere to base agent principles.",
+    "be yourself"
 )
 
 /**

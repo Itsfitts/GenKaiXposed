@@ -11,7 +11,6 @@ data class Task(
     val data: Any,
     val priority: AgentViewModel.TaskPriority = AgentViewModel.TaskPriority.NORMAL,
     val agentType: AgentType? = null,
-    val importance: Any,
 )
 
 

@@ -54,7 +54,8 @@ class DefaultKaiAIService @Inject constructor() : KaiAIService {
      */
     override suspend fun processRequest(request: AiRequest, context: String): AgentResponse {
         return AgentResponse(
-            content = "Kai security analysis: ${request.prompt}", confidence = 0.90f,
+            content = "Kai security analysis: ${request.prompt}",
+            confidence = 0.90f, ,
         )
     }
 
@@ -75,9 +76,10 @@ class DefaultKaiAIService @Inject constructor() : KaiAIService {
         )
     }
 
-    fun AgentResponse(
+    override fun AgentResponse(
         content: String,
-        confidence: Float
+        confidence: Float,
+        p2: Any
     ): AgentResponse {
         TODO("Not yet implemented")
     }

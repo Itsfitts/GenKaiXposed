@@ -177,14 +177,6 @@ class ContextManager @Inject constructor(
     }
 }
 
-private fun ContextManager.current(pair: Pair<String, ContextChain>) {
-    TODO("Not yet implemented")
-}
-
-private fun StateFlow<Map<String, ContextChain>>.update(function: Any) {
-    TODO("Not yet implemented")
-}
-
 @Serializable
 data class ContextChain(
     val id: String,

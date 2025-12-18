@@ -26,7 +26,7 @@ import dev.aurakai.auraframefx.cascade.CascadeAgent
  * - Ensure graceful shutdown
  */
 @Singleton
-open class GenesisOrchestrator @Inject constructor(
+class GenesisOrchestrator @Inject constructor(
     private val auraAgent: AuraAgent,
     private val kaiAgent: KaiAgent,
     private val cascadeAgent: CascadeAgent,

@@ -127,7 +127,6 @@ dependencies {
     // ═══════════════════════════════════════════════════════════════════════════
 
     implementation(libs.hilt.android)
-    implementation(libs.androidx.room.external.antlr)
     ksp(libs.hilt.compiler)
 
     implementation(libs.retrofit.core)

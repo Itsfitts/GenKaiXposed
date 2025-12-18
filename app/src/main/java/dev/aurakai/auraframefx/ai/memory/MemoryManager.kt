@@ -122,31 +122,3 @@ open class MemoryManager @Inject constructor(
         TODO("Not yet implemented")
     }
 }
-
-/**
- * Returns memory items whose timestamps are within the configured context window duration from the current time.
- *
- * Items are sorted by descending timestamp and limited to the maximum number specified in the configuration.
- *
- * @param task The task identifier (currently not used for filtering).
- * @return A list of recent memory items within the context window.
-
-
-/**
- * Retrieves the latest memory statistics snapshot.
- *
- * @return The current `MemoryStats` representing the state of the memory store.
-*/
-fun getMemoryStats(): MemoryStats? {
-return getMemoryStats()!!.value
-}
-
-
-
-// Corrected type to MutableStateFlow<MemoryStats> and initialized with a default value
-/**
- * Updates the memory statistics with the current total number of items, count of recent items, and total memory size.
- *
- * Recent items are with timestamps within the configured maximum chain length duration from the current time.
-*/
-}
