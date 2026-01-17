@@ -1,0 +1,110 @@
+### TIME:250915
+
+name: Build APK From Other Repo
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build from'
+        required: true
+        default: 'main'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Set GOOG_SERV_JSON early so it's available to steps after it's exported to GITHUB_ENV
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - id: get-project
+        name: Get Project Name
+        # read the repo/url to clone from project-to-build file at repo root
+        run: echo "PROJECT=$(cat project-to-build)" >> $GITHUB_OUTPUT
+
+      - name: Set GOOG_SERV_JSON
+        # Export GOOG_SERV_JSON pointing to ~/app/google-services.json for subsequent steps
+        run: echo "GOOG_SERV_JSON=$HOME/app/google-services.json" >> $GITHUB_ENV
+
+      - name: Clone Project
+        run: |
+          # Use the branch chosen when the workflow was dispatched
+          git clone --depth=1 --branch=${{ github.event.inputs.branch }} ${{ steps.get-project.outputs.PROJECT }} project
+
+      - name: Make Gradlew Executable
+        working-directory: ./project
+        run: |
+          if [ ! -f "gradlew" ]; then gradle wrapper; fi
+          chmod +x gradlew
+
+      - name: Set Gradle Memory(support existing/missing config)
+        run: |
+          if [ -f gradle.properties ]; then
+            if grep -q "^org.gradle.jvmargs=" gradle.properties; then
+              ### 存在则替换原有配置
+              sed -i 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g/' gradle.properties
+            else
+              ### 不存在则在文件末尾安全新增（加换行避免拼接）
+              echo -e "\norg.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g" >> gradle.properties
+            fi
+            ### 输出修改后的文件内容到日志
+            echo "=== Modified gradle.properties content ==="
+            cat gradle.properties
+          else
+            echo "No gradle.properties at runner root; skipping memory configuration."
+          fi
+
+      - name: Source google-services.json from cloned project
+        # Ensure google-services.json from the cloned repo is placed at project/app/google-services.json
+        # and also copied to GOOG_SERV_JSON ($HOME/app/google-services.json)
+        run: |
+          # prefer project/app/google-services.json if it already exists
+          if [ -f project/app/google-services.json ]; then
+            echo "google-services.json found at project/app/google-services.json"
+            mkdir -p "$(dirname "$GOOG_SERV_JSON")"
+            cp project/app/google-services.json "$GOOG_SERV_JSON" || true
+            echo "Also copied to $GOOG_SERV_JSON"
+          # If it's at the project root, copy it into project/app/ and to GOOG_SERV_JSON
+          elif [ -f project/google-services.json ]; then
+            echo "Found project/google-services.json, copying to project/app/ and to $GOOG_SERV_JSON"
+            mkdir -p project/app
+            cp project/google-services.json project/app/google-services.json
+            mkdir -p "$(dirname "$GOOG_SERV_JSON")"
+            cp project/google-services.json "$GOOG_SERV_JSON" || true
+          else
+            echo "No google-services.json found in cloned project; continuing without it."
+          fi
+          # show the GOOG_SERV_JSON path and whether it exists
+          echo "GOOG_SERV_JSON=$GOOG_SERV_JSON"
+          if [ -f "$GOOG_SERV_JSON" ]; then
+            echo "GOOG_SERV_JSON exists and size:"
+            ls -lh "$GOOG_SERV_JSON"
+          else
+            echo "GOOG_SERV_JSON not present"
+          fi
+
+      - name: Build APK
+        working-directory: ./project
+        env:
+          # ensure Gradle can see the GOOG_SERV_JSON value if any step needs it
+          GOOG_SERV_JSON: ${{ env.GOOG_SERV_JSON }}
+        run: |
+          echo "Using GOOG_SERV_JSON=$GOOG_SERV_JSON"
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-build-from-other-repo
+          path: ./**/*.apk
